@@ -1,28 +1,39 @@
  
-
-void subset(int i, int sum, vector<int> &num, vector<int> &ans)
+#include<algorithm>
+vector<vector<int>> uniqueSubsets(int n, vector<int> &arr)
 {
+    vector<vector<int>> subsets;
+    sort(arr.begin(), arr.end());
 
-    // Completely traverse the whole array, insert the 'sum' in the 'ans' vector.
-    if (i == num.size())
-    {
-        ans.push_back(sum);
-        return;
+    // Trying all subsets.
+    for (int mask = 0; mask < (1<<n); mask++){
+
+        vector<int> cur;
+        bool unique = true;
+        for (int i = 0; i < n; i++){
+
+            if (( mask & (1<<i) ) == 0){
+                // Bit not set.
+                continue;
+            }
+
+            if (i > 0 && arr[i] == arr[i-1] && (mask & (1<<(i-1))) == 0 ){
+                unique = false;
+            }
+
+            if (unique == false){
+                break;
+            }
+            
+            // Inserting arr[i] to current subset.
+            cur.push_back(arr[i]);
+        }
+
+        if(unique){
+            subsets.push_back(cur);
+        }
     }
 
-    // Insert the element in the sum.
-    subset(i + 1, sum + num[i], num, ans);
-    // Don't take the element in the sum.
-    subset(i + 1, sum, num, ans);
-}
-
-vector<int> subsetSum(vector<int> &num)
-{
-    // 'ans' vector contains all the subset sums.
-    vector<int> ans;
-
-    subset(0, 0, num, ans);
-    // Sort the vector and finally return it.
-    sort(ans.begin(), ans.end());
-    return ans;
+    sort(subsets.begin(), subsets.end());
+    return subsets;
 }
