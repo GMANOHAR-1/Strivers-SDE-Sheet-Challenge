@@ -1,44 +1,69 @@
 /*
-    Time complexity: O(log(K))
-    Space complexity: O(log(K))
+    Time complexity: O(N)
+    Space complexity: O(1)
 
-    where K denotes the Kth person in line waiting to be served.
- */
+    Where ‘N’ is the size of the given array.
+*/
 
+int partition(vector<int> &arr, int left, int right, int pivotIndex) 
+{
+    int pivotValue = arr[pivotIndex];
+    
+    // Bring pivot element at the end of range.
+    swap(arr[pivotIndex], arr[right]); 
 
-int ninjaAndLadoos(vector<int> &row1, vector<int> &row2, int m, int n, int k) 
-{     
-    // If length of first array is smaller then length of second then swap both the arrays.    
-    if (m > n) 
+    int current = left;
+    
+    for(int i = left; i < right; i++) 
     {
-        return ninjaAndLadoos(row2, row1, n, m, k);
+        if(arr[i] < pivotValue) 
+        {
+            swap(arr[current], arr[i]);
+            current++;
+        }
     }
-  
-    if (m == 0) 
+    swap(arr[right], arr[current]);
+    
+    return current;
+}
+
+int quickSelect(vector<int> &arr, int left, int right, int k) 
+{
+    if(left == right)
     {
-        return row2[k - 1];
+        // Size of array is 1.
+        return arr[left];
     }
     
-    // If k is equal to 1
-    if (k == 1) 
-    {
-        return min(row1[0], row2[0]);
-    }
-  
-    int i = min(m, k / 2);
-    int j = min(n, k / 2);
+    // Note we can select Median as pivot to guaranteed O(N) complexity always.
+    int pivotIndex = left + rand() % (right-left+1);
     
-    // If row1[i - 1] is greater than row2[j - 1]
-    if (row1[i - 1] > row2[j - 1]) 
-    {
-        vector<int> newRow2;
-        newRow2.assign(row2.begin() + j, row2.end());
-        
-        return ninjaAndLadoos(row1, newRow2, m, n - j, k - j);
-    } 
+    int partitionIndex = partition(arr, left, right, pivotIndex);
 
-    vector<int> newRow1;
-    newRow1.assign(row1.begin() + i, row1.end());
-        
-    return ninjaAndLadoos(newRow1, row2, m - i, n, k - i);  
-} 
+    if(partitionIndex >= k)
+    {
+        // Recur for right subarray
+        return quickSelect(arr, left, partitionIndex-1, k);
+    }
+    
+    if(partitionIndex < k-1)
+    {
+        // Recur for left subarray.
+        return quickSelect(arr, partitionIndex+1, right, k);
+    }
+
+    return arr[partitionIndex];
+}
+
+vector<int> kthSmallLarge(vector<int> &arr, int n, int k)
+{
+    vector<int> result(2);
+    
+    // Kth smallest element
+    result[0] = quickSelect(arr, 0, n-1, k);
+    
+    // Kth largest element
+    result[1] = quickSelect(arr, 0, n-1, n-k+1);
+
+    return result;
+}
